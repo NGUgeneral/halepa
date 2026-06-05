@@ -46,6 +46,32 @@ WHATSAPP_PHONE_NUMBER_ID="123456789"
 # Array of destination recipient phone numbers in standard E.164 format
 WHATSAPP_TARGET_PHONES="[+31600000000, +31611111111]"
 ```
+
+## AWS Lambda Infrastructure Configuration
+
+When provisioning Halepa inside the AWS Management Console, ensure your function satisfies the following baseline technical specifications to maintain optimal performance and security execution boundaries.
+
+### 1. Basic Settings
+* **Runtime:** `Python 3.12` (or higher)
+* **Architecture:** `arm64` (Recommended for lower latency and better price-to-performance fractions via AWS Graviton) or `x86_64`.
+* **Memory:** `128 MB` (Our zero-dependency footprint requires minimal allocation. Scaling this up is unnecessary as execution finishes in milliseconds).
+* **Timeout:** `10 seconds` (Though network dispatches typically settle in less than 1 second, a 10-second window leaves an ideal buffer for sequential multi-channel API delivery fallback handling).
+
+### 2. Environment Variables
+Navigate to **Configuration** → **Environment variables** inside your Lambda function dashboard and map the exact keys matching your active notification channels:
+
+| Key | Description / Example Value |
+| :--- | :--- |
+| `TELEGRAM_BOT_TOKEN` | `1234567890:ABCdef...` |
+| `TELEGRAM_CHAT_IDS` | `[-100987654321, 123456789]` |
+| `SLACK_WEBHOOK_URLS` | `[https://hooks.slack.com/services/...]` |
+| `TEAMS_WEBHOOK_URLS` | `[https://your-office.webhook.office.com/...]` |
+| `WHATSAPP_API_TOKEN` | `EAAl...` |
+| `WHATSAPP_PHONE_NUMBER_ID` | `123456789` |
+| `WHATSAPP_TARGET_PHONES` | `[+31600000000]` |
+
+*Note: Any channel whose token key is omitted or left blank will be gracefully and dynamically skipped by the engine during runtime execution.*
+
 ## Supported Ingestion Formats
 
 Halepa uses Python structural pattern matching to analyze the incoming event signatures and format the payload into human-readable alerts.

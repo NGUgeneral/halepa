@@ -1,13 +1,15 @@
+from typing import Iterator
+import config
 from .base import NotificationProvider
 from .telegram import TelegramProvider
 
-# Registry for dynamic strategy resolution
-PROVIDERS = {
-    "telegram": TelegramProvider
+PROVIDER_MAPPING = {
+    "telegram": (config.TELEGRAM_BOT_TOKEN, TelegramProvider),
+    # "slack": (config.SLACK_WEBHOOK_URLS, SlackProvider),
+    # "teams": (config.TEAMS_WEBHOOK_URLS, TeamsProvider),
 }
 
-def get_provider(name: str) -> NotificationProvider:
-    provider_cls = PROVIDERS.get(name.lower())
-    if not provider_cls:
-        raise ValueError(f"Unsupported notification provider: {name}")
-    return provider_cls()
+def get_active_providers() -> Iterator[NotificationProvider]:
+    for name, (credential, provider_cls) in PROVIDER_MAPPING.items():
+        if credential:
+            yield provider_cls()

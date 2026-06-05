@@ -1,0 +1,46 @@
+name: Continuous Deployment
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    name: Package and Deploy Zip to AWS Lambda
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # --- 1. Authenticate Safely via Stored Credentials ---
+      # Configures secure AWS runtime execution scopes using GitHub secrets context
+      - name: Configure AWS Credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      # --- 2. Bundle Production Footprint Strictly ---
+      # Packages explicit application primitives. Systematically excludes local configuration tracking (.env),
+      # untracked local playground code (main.local.py), git layers, and compiled bytecode caches.
+      - name: Create Production Deployment Package
+        run: |
+          zip -r deployment.zip main.py engine.py config.py providers/ \
+            -x "*.pyc" "__pycache__/*" "*.local.py" ".env" ".git*"
+
+      # --- 3. Fire Native API Update Code Hook ---
+      # Instructs AWS Lambda to immediately drop its active storage layers, hot-swap
+      # the execution pointer, and mount this new 15KB zip package straight to memory.
+      - name: Deploy Payload to AWS Lambda Function Layer
+        env:
+          LAMBDA_FUNCTION_NAME: halepa-function
+        run: |
+          aws lambda update-function-code \
+            --function-name $LAMBDA_FUNCTION_NAME \
+            --zip-file fileb://deployment.zip

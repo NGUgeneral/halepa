@@ -13,13 +13,21 @@ def load_env_file():
                 continue
             if "=" in line:
                 key, val = line.split("=", 1)
-                key = key.strip()
-                val = val.strip().strip("'").strip('"')
-                if key:
-                    os.environ[key] = val
+                os.environ[key.strip()] = val.strip().strip("'").strip('"')
 
 load_env_file()
 
-HALEPA_PROVIDER = os.environ.get("HALEPA_PROVIDER", "telegram")
+# Telegram
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_IDS = os.environ.get("TELEGRAM_CHAT_IDS", "")
+
+# Slack
+SLACK_WEBHOOK_URLS = os.environ.get("SLACK_WEBHOOK_URLS", "")
+
+# MS Teams
+TEAMS_WEBHOOK_URLS = os.environ.get("TEAMS_WEBHOOK_URLS", "")
+
+# WhatsApp
+WHATSAPP_API_TOKEN = os.environ.get("WHATSAPP_API_TOKEN")
+WHATSAPP_PHONE_NUMBER_ID = os.environ.get("WHATSAPP_PHONE_NUMBER_ID")
+WHATSAPP_TARGET_PHONES = os.environ.get("WHATSAPP_TARGET_PHONES", "")

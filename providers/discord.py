@@ -30,17 +30,21 @@ class DiscordProvider(NotificationProvider):
                     "description": text,
                     "color": color,
                     "footer": {
-                        "text": "Halepa Stateless Monitoring Engine"
+                        "text": "Halepa"
                     }
                 }
             ]
         }
         
         data = json.dumps(payload).encode("utf-8")
+        headers = {
+            "Content-Type": "application/json",
+            "User-Agent": "HalepaAlertEngine/1.0 (KHTML, like Gecko)"
+        }
         req = urllib.request.Request(
             target, 
             data=data, 
-            headers={"Content-Type": "application/json"}, 
+            headers=headers, 
             method="POST"
         )
         

@@ -17,6 +17,9 @@ def load_env_file():
 
 load_env_file()
 
+# Discord
+DISCORD_WEBHOOK_URLS = os.environ.get("DISCORD_WEBHOOK_URLS", "")
+
 # Telegram
 TELEGRAM_BOT_TOKEN = os.environ.get("TELEGRAM_BOT_TOKEN")
 TELEGRAM_CHAT_IDS = os.environ.get("TELEGRAM_CHAT_IDS", "")

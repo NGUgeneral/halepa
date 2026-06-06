@@ -29,3 +29,9 @@ class NotificationProvider(ABC):
 
         success_flags = [self._send_to_single_target(text, target) for target in subscriber_list]
         return all(success_flags)
+    
+    def _is_successful_status(self, status: int) -> bool:
+        return status in (200, 201, 204)
+    
+    def _log_failure(self, target: str, exception: Exception):
+        print(f"[ERROR] {self.__class__.__name__} failed for target {target}: {exception}")

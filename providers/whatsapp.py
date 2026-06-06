@@ -35,7 +35,7 @@ class WhatsAppProvider(NotificationProvider):
         )
         try:
             with urllib.request.urlopen(req, timeout=5) as response:
-                return response.status in (200, 201)
+                return self._is_successful_status(response.status)
         except urllib.error.URLError as e:
-            print(f"[ERROR] WhatsApp failed for phone {target}: {e}")
+            self._log_failure(target, e)
             return False

@@ -18,7 +18,7 @@ class SlackProvider(NotificationProvider):
         req = urllib.request.Request(target, data=data, headers={"Content-Type": "application/json"}, method="POST")
         try:
             with urllib.request.urlopen(req, timeout=5) as response:
-                return response.status in (200, 201)
+                return self._is_successful_status(response.status)
         except urllib.error.URLError as e:
-            print(f"[ERROR] Slack failed for webhook {target}: {e}")
+            self._log_failure(target, e)
             return False

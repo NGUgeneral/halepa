@@ -12,8 +12,36 @@ Built strictly with the Python 3.12 standard library to achieve near-zero cold s
 * **Self-Disabling Infrastructure:** Fully configuration-driven. If a provider's foundational credentials are not found in the environment, the engine dynamically skips it.
 
 ---
+## 🚀 Quick Start & AWS Deployment
 
-## Configuration Guide (.env / Lambda Environment)
+Halepa is designed to be completely stateless and architecture-agnostic. You can deploy it to AWS Lambda in under 5 minutes using the native standard library pipeline.
+
+### Deployment Steps
+
+1. **Deploy the Lambda Function**
+   - Package the repository files into a standard `.zip` archive.
+   - Upload the archive to a fresh **AWS Lambda** function instance (running Python 3.11+).
+   - Set the runtime Handler configuration to: `main.lambda_handler`
+
+2. **Configure Environment Variables**
+   - Inside your Lambda configuration settings, add the target webhook variables for the platforms you want to route to (leave unconfigured channels blank to omit them gracefully):
+     - `DISCORD_WEBHOOK_URLS`: `https://discord.com/api/webhooks/...`
+     - `TELEGRAM_CHAT_IDS`: Comma-separated list of target chat IDs.
+     - `TELEGRAM_BOT_TOKEN`: Your secure Telegram bot authorization token.
+
+3. **Create and Link the AWS SNS Topic**
+   - Navigate to **AWS SNS (Simple Notification Service)** and create a new Standard Topic named `SNS-Halepa-Topic`.
+   - Create a subscription within that topic, setting the protocol to **AWS Lambda** and pointing it directly to your Halepa Lambda instance ARN.
+
+4. **Route CloudWatch Alarms to SNS**
+   - Go to your **AWS CloudWatch** dashboard and select the Alarms you want to track.
+   - Under the **Actions** configuration of your alarm policy, set the notification trigger to fire into your newly created `SNS-Halepa-Topic` for both `In alarm` and `OK` state transitions.
+
+---
+
+> **Enterprise Integration Note:** For advanced infrastructure patterns requiring multi-region routing, cross-account AWS IAM permission policies, or custom Terraform infrastructure-as-code deployment pipelines, feel free to open an issue or reach out directly for consulting layout support.
+
+## Configuration Guide (.env)
 
 Halepa reads configuration values exactly as they are structured in the environment. It supports relaxed syntax boundaries for target arrays, meaning lists can be supplied as raw strings, comma-separated lists, or wrapped in JSON-style brackets with loose whitespace.
 
@@ -33,11 +61,11 @@ TELEGRAM_CHAT_IDS="[123456789, -100987654321]"
 
 # --- Slack Strategy ---
 # Targeted Channel Webhooks generated via Slack Apps
-SLACK_WEBHOOK_URLS="[[https://hooks.slack.com/services/T00/B00/X00](https://hooks.slack.com/services/T00/B00/X00), [https://hooks.slack.com/services/T00/B00/Y00](https://hooks.slack.com/services/T00/B00/Y00)]"
+SLACK_WEBHOOK_URLS="[https://hooks.slack.com/services/T00/B00/X00, https://hooks.slack.com/services/T00/B00/Y00]"
 
 # --- Microsoft Teams Strategy ---
 # Target Channel Connectors generated via Office 365 Webhooks
-TEAMS_WEBHOOK_URLS="[[https://your-office.webhook.office.com/webhookb2/](https://your-office.webhook.office.com/webhookb2/)...]"
+TEAMS_WEBHOOK_URLS="[https://your-office.webhook.office.com/webhookb2/...]"
 
 # --- WhatsApp Strategy ---
 # Meta Graph API authorization token and originating business profile ID
@@ -45,6 +73,9 @@ WHATSAPP_API_TOKEN="EAAl..."
 WHATSAPP_PHONE_NUMBER_ID="123456789"
 # Array of destination recipient phone numbers in standard E.164 format
 WHATSAPP_TARGET_PHONES="[+31600000000, +31611111111]"
+
+# --- Discord ---
+DISCORD_WEBHOOK_URLS="[https://discord.com/api/webhooks/...]"
 ```
 
 ## AWS Lambda Infrastructure Configuration
@@ -69,6 +100,7 @@ Navigate to **Configuration** → **Environment variables** inside your Lambda f
 | `WHATSAPP_API_TOKEN` | `EAAl...` |
 | `WHATSAPP_PHONE_NUMBER_ID` | `123456789` |
 | `WHATSAPP_TARGET_PHONES` | `[+31600000000]` |
+|`DISCORD_WEBHOOK_URLS`|`[https://discord.com/api/webhooks/...]`|
 
 *Note: Any channel whose token key is omitted or left blank will be gracefully and dynamically skipped by the engine during runtime execution.*
 
@@ -93,7 +125,7 @@ When a CloudWatch Alarm triggers an SNS topic subscription, Halepa parses the em
   ]
 }
 ```
-### Direct Broadcast Payload
+### 2. Direct Broadcast Payload
 Perfect for firing manual system notifications, pipeline completion updates, or deployment logs via a Lambda Function URL. 
 
 **Expected Event Shape:**

@@ -11,6 +11,7 @@ permissions:
 jobs:
   deploy:
     name: Package and Deploy Zip to AWS Lambda
+    if: false # disable deployment
     runs-on: ubuntu-latest
 
     steps:
